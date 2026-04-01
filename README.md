@@ -127,3 +127,9 @@ MODEL            = "gpt-5.4"
 REASONING_EFFORT = "medium"   # none | low | medium | high | xhigh
 MAX_TOKENS       = 25000      # reasoning + output tokens combined
 ```
+
+---
+
+## Variant Evaluation
+
+The repo now also includes an Ollama-first inference/evaluation scaffold in [`inference_eval/README.md`](/Users/kevin/school/532/project_repo/inference_eval/README.md). It is meant for model/prompt comparisons against the current `annotated_results.csv` table as provisional ground truth while human review is still in progress.
