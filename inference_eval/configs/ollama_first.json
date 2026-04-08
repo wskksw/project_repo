@@ -1,58 +1,102 @@
 {
   "variants": [
+    // {
+    //   "name": "ollama-gemma3-zero-shot",
+    //   "provider": "ollama",
+    //   "model": "gemma3:4b",
+    //   "prompt_strategy": "zero_shot",
+    //   "temperature": 0,
+    //   "num_ctx": 32768,
+    //   "enabled": true
+    // },
+    // {
+    //   "name": "ollama-gemma3-few-shot",
+    //   "provider": "ollama",
+    //   "model": "gemma3:4b",
+    //   "prompt_strategy": "few_shot",
+    //   "temperature": 0,
+    //   "num_ctx": 32768,
+    //   "enabled": true
+    // },
     {
-      "name": "ollama-gemma3-vanilla",
+      "name": "ollama-gemma3-retrieval-few-shot",
       "provider": "ollama",
       "model": "gemma3:4b",
-      "prompt_strategy": "vanilla_zero_shot",
+      "prompt_strategy": "retrieval_few_shot",
+      "retrieval_k": 2,
       "temperature": 0,
       "num_ctx": 32768,
-      "enabled": true
-    },
-    {
-      "name": "ollama-gemma3-reference",
-      "provider": "ollama",
-      "model": "gemma3:4b",
-      "prompt_strategy": "reference_few_shot",
-      "temperature": 0,
-      "num_ctx": 32768,
-      "enabled": true
-    },
-    {
-      "name": "ollama-qwen3-vanilla",
-      "provider": "ollama",
-      "model": "qwen3:8b",
-      "prompt_strategy": "vanilla_zero_shot",
-      "temperature": 0,
-      "num_ctx": 32768,
-      "enabled": true
-    },
-    {
-      "name": "ollama-qwen3-reference",
-      "provider": "ollama",
-      "model": "qwen3:8b",
-      "prompt_strategy": "reference_few_shot",
-      "temperature": 0,
-      "num_ctx": 32768,
-      "enabled": true
-    },
-    {
-      "name": "openai-gpt-5.4-mini-reference",
-      "provider": "openai",
-      "model": "gpt-5.4-mini",
-      "prompt_strategy": "reference_few_shot",
-      "reasoning_effort": "low",
-      "max_output_tokens": 1800,
       "enabled": false
     },
     {
-      "name": "openai-gpt-5.4-reference",
-      "provider": "openai",
-      "model": "gpt-5.4",
-      "prompt_strategy": "reference_few_shot",
-      "reasoning_effort": "medium",
-      "max_output_tokens": 1800,
+      "name": "ollama-gemma3-retrieval-few-shot-minilm",
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "prompt_strategy": "retrieval_few_shot",
+      "retrieval_backend": "sentence_transformer",
+      "retrieval_embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+      "retrieval_k": 2,
+      "temperature": 0,
+      "num_ctx": 32768,
+      "enabled": false
+    },
+    {
+      "name": "ollama-qwen3-zero-shot",
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "prompt_strategy": "zero_shot",
+      "temperature": 0,
+      "num_ctx": 32768,
+      "enabled": true
+    },
+    {
+      "name": "ollama-qwen3-few-shot",
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "prompt_strategy": "few_shot",
+      "temperature": 0,
+      "num_ctx": 32768,
+      "enabled": true
+    },
+    {
+      "name": "ollama-qwen3-retrieval-few-shot",
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "prompt_strategy": "retrieval_few_shot",
+      "retrieval_k": 2,
+      "temperature": 0,
+      "num_ctx": 32768,
+      "enabled": true
+    },
+    {
+      "name": "ollama-qwen3-retrieval-few-shot-minilm",
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "prompt_strategy": "retrieval_few_shot",
+      "retrieval_backend": "sentence_transformer",
+      "retrieval_embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+      "retrieval_k": 2,
+      "temperature": 0,
+      "num_ctx": 32768,
       "enabled": false
     }
+    // Optional OpenAI variants intentionally commented out for local-only runs.
+    // ,
+    // {
+    //   "name": "openai-gpt-5.4-mini-few-shot",
+    //   "provider": "openai",
+    //   "model": "gpt-5.4-mini",
+    //   "prompt_strategy": "few_shot",
+    //   "reasoning_effort": "low",
+    //   "enabled": false
+    // },
+    // {
+    //   "name": "openai-gpt-5.4-few-shot",
+    //   "provider": "openai",
+    //   "model": "gpt-5.4",
+    //   "prompt_strategy": "few_shot",
+    //   "reasoning_effort": "low",
+    //   "enabled": false
+    // }
   ]
 }

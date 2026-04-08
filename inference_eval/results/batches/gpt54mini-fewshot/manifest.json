@@ -1,0 +1,28 @@
+{
+  "created_utc": "20260407T232646Z",
+  "data_path": "/Users/kevin/school/532/project_repo/annotation_folder/annotated_results_merged_100.xlsx",
+  "rows_considered": 100,
+  "rows_with_narratives": 100,
+  "constructs": [
+    "c1",
+    "c2",
+    "c3",
+    "c4"
+  ],
+  "calls_per_narrative": 4,
+  "variant_name": "openai-gpt-5-4-mini-few-shot",
+  "model": "gpt-5.4-mini",
+  "prompt_strategy": "few_shot",
+  "max_output_tokens": null,
+  "reasoning_effort": "low",
+  "request_count": 400,
+  "requests_path": "/Users/kevin/school/532/project_repo/inference_eval/results/batches/gpt54mini-fewshot/requests.jsonl",
+  "request_index_path": "/Users/kevin/school/532/project_repo/inference_eval/results/batches/gpt54mini-fewshot/request_index.jsonl",
+  "transductive_retrieval_experiment": false,
+  "retrieval_policy": null,
+  "retrieval_k": null,
+  "retrieval_candidate_k": null,
+  "retrieval_backend": null,
+  "retrieval_embedding_model": null,
+  "submission_path": "/Users/kevin/school/532/project_repo/inference_eval/results/batches/gpt54mini-fewshot/submission.json"
+}

@@ -1,0 +1,4 @@
+Model,Prompt Strategy,C3 Code Acc,Emotion Precision,Emotion Recall,Emotion F1,Tier Accuracy
+GPT-5.4-mini,Zero-shot,0.46,0.4267,0.6154,0.5039,0.859
+GPT-5.4-mini,Few-shot,0.45,0.415,0.5865,0.4861,0.9103
+GPT-5.4-mini,Retrieval few-shot (MiniLM),0.45,0.4214,0.5673,0.4836,0.8718

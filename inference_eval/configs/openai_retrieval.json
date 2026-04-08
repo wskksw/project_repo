@@ -1,0 +1,24 @@
+{
+  "variants": [
+    {
+      "name": "openai-gpt-retrieval-few-shot",
+      "provider": "openai",
+      "model": "gpt-5-nano",
+      "prompt_strategy": "retrieval_few_shot",
+      "retrieval_k": 2,
+      "reasoning_effort": "low",
+      "enabled": true
+    },
+    {
+      "name": "openai-gpt-retrieval-few-shot-minilm",
+      "provider": "openai",
+      "model": "gpt-5-nano",
+      "prompt_strategy": "retrieval_few_shot",
+      "retrieval_backend": "sentence_transformer",
+      "retrieval_embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+      "retrieval_k": 2,
+      "reasoning_effort": "low",
+      "enabled": true
+    }
+  ]
+}
