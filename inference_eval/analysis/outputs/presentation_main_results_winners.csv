@@ -1,0 +1,8 @@
+Metric,Best Value,Winner(s)
+C0 Acc,0.5077,GPT-5.4-mini | Zero-shot
+C1 Acc,0.65,GPT-5.4-mini | Few-shot
+C2 Abs Acc,0.9,GPT-5.4-mini | Retrieval few-shot (MiniLM)
+C2 Rel Acc,0.5,GPT-5.4-mini | Zero-shot; GPT-5.4-mini | Retrieval few-shot (MiniLM)
+C3 Code Acc,0.52,Qwen 3 8B | Zero-shot
+C3 Emotion F1,0.5039,GPT-5.4-mini | Zero-shot
+C4 Acc,0.75,GPT-5.4-mini | Retrieval few-shot (MiniLM)

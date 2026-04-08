@@ -1,85 +1,51 @@
 # Inference And Evaluation Pipeline
 
-This folder is the variant-analysis scaffold for the CFPB fraud annotation project. It is intentionally separate from the original `annotation_pipeline.py` so you can run prompt/model comparisons without disturbing the current batch annotation workflow.
+This folder contains the prompt-variant evaluation scaffold for the CFPB fraud annotation project.
 
-For now, treat [`annotation_folder/annotated_results.csv`](/Users/kevin/school/532/project_repo/annotation_folder/annotated_results.csv) as the provisional ground-truth table. Human adjudication is still incomplete, but this lets you compare extractor variants now and swap in reviewed labels later.
+The current target file is [`annotation_folder/annotated_results_merged_100.xlsx`](/Users/kevin/school/532/project_repo/annotation_folder/annotated_results_merged_100.xlsx). The runner and evaluator now align to that merged workbook and the March 2026 annotation guide.
 
-## What This Adds
+## What Changed
 
-- `run_variants.py`: runs prompt/model/provider variants and writes per-construct predictions.
-- `evaluate_variants.py`: scores those predictions against provisional ground truth and adds a majority-class baseline.
-- `configs/ollama_first.json`: a starter config with local Ollama variants enabled first and OpenAI variants present but disabled.
-- `prompt_templates.py`: two prompt strategies grounded in the current annotation guide and the existing prompt style.
+- The default dataset is now the merged Excel workbook, not the old provisional CSV.
+- The pipeline still makes exactly `4` model calls per narrative.
+- Call `c1` now bundles Construct `0` and Construct `1` so the four-call budget is preserved.
+- Prompt strategies are now `zero_shot`, `few_shot`, and `retrieval_few_shot`.
+- `retrieval_few_shot` uses leave-one-out retrieval over the current merged workbook, so it should be treated as a transductive experiment rather than a leakage-free benchmark.
+- Local variants are the default matrix:
+  - `qwen3:8b` x `zero_shot`
+  - `qwen3:8b` x `few_shot`
+  - `qwen3:8b` x `retrieval_few_shot`
+- OpenAI variants are left commented out in the config file.
+- Structured output is requested for every call. If a local model drifts out of schema, the runner falls back to JSON extraction/parsing from the raw text.
+- Outputs now go to one stable directory by default: `inference_eval/results/`.
+- The runner writes predictions row by row and resumes automatically from previously completed `complaint x construct x variant` outputs.
+- `c3` evaluation now matches the merged target format:
+  - `c3_code`
+  - comma-separated emotion set
+  - one overall tier
+  - one set of inference-pattern labels
 
-## Mermaid Pipeline
+## Four-Call Layout
 
-```mermaid
-flowchart TD
-    A["annotation_folder/annotated_results.csv<br/>provisional ground truth + narratives"] --> B["run_variants.py"]
-    C["configs/ollama_first.json<br/>provider x model x prompt strategy"] --> B
-    D["prompt_templates.py<br/>vanilla_zero_shot / reference_few_shot"] --> B
-    B --> E["runs/<timestamp>/predictions/*.jsonl"]
-    E --> F["evaluate_variants.py"]
-    A --> F
-    F --> G["evaluation/metrics_by_variant.csv"]
-    F --> H["evaluation/metrics_summary.md"]
-    F --> I["majority-class baseline comparison"]
-```
+| Call Key | Annotation Scope | Target Columns |
+| --- | --- | --- |
+| `c1` | Construct 0 + Construct 1 | `c0_label`, `c0_evidence quotes`, `c1_score`, `c1_label`, `c1_evidence_quotes` |
+| `c2` | Construct 2 | `c2_abs_code`, `c2_abs_amount`, `c2_rel_score`, `c2_evidence_quotes` |
+| `c3` | Construct 3 | `c3_code`, `c3_emotions`, `c3_tier`, `c3_inference_pattern`, `c3_evidence_quotes` |
+| `c4` | Construct 4 | `c4_score`, `c4_label`, `c4_evidence_quotes` |
 
-## Mermaid Variant Map
-
-```mermaid
-flowchart LR
-    A["Variant space"] --> B["Provider"]
-    B --> C["Ollama"]
-    B --> D["OpenAI"]
-    C --> E["gemma3:4b"]
-    C --> F["qwen3:8b"]
-    D --> G["gpt-5.4-mini"]
-    D --> H["gpt-5.4"]
-    E --> I["vanilla_zero_shot"]
-    E --> J["reference_few_shot"]
-    F --> K["vanilla_zero_shot"]
-    F --> L["reference_few_shot"]
-    G --> M["reference_few_shot"]
-    H --> N["reference_few_shot"]
-```
-
-## Default Variant Set
-
-| Variant | Provider | Model | Prompt Strategy | Enabled |
-| --- | --- | --- | --- | --- |
-| `ollama-gemma3-vanilla` | Ollama | `gemma3:4b` | `vanilla_zero_shot` | Yes |
-| `ollama-gemma3-reference` | Ollama | `gemma3:4b` | `reference_few_shot` | Yes |
-| `ollama-qwen3-vanilla` | Ollama | `qwen3:8b` | `vanilla_zero_shot` | Yes |
-| `ollama-qwen3-reference` | Ollama | `qwen3:8b` | `reference_few_shot` | Yes |
-| `openai-gpt-5.4-mini-reference` | OpenAI | `gpt-5.4-mini` | `reference_few_shot` | No |
-| `openai-gpt-5.4-reference` | OpenAI | `gpt-5.4` | `reference_few_shot` | No |
-
-Adjust the model tags to match whatever you have actually pulled locally.
-
-## Prompt Strategies
-
-- `vanilla_zero_shot`: short task definition, no worked examples, strict schema output.
-- `reference_few_shot`: stronger construct rules, a few worked examples or decision rules, and closer alignment with the current annotation guide plus the original extraction prompt style.
-
-The intent is to isolate two useful axes:
-
-1. Model family / size differences.
-2. Prompting quality differences with the same underlying construct schema.
 
 ## Quick Start
 
 ### 1. Pull local Ollama models
 
-Example:
-
 ```bash
+pip install -r inference_eval/requirements.txt
 ollama pull gemma3:4b
 ollama pull qwen3:8b
 ```
 
-### 2. Run a short smoke pass
+### 2. Run a smoke pass
 
 ```bash
 python inference_eval/run_variants.py \
@@ -87,16 +53,109 @@ python inference_eval/run_variants.py \
   --limit 5
 ```
 
-This creates a run folder under `inference_eval/runs/` with:
+This writes into the stable output folder `inference_eval/results/` with:
 
 - `manifest.json`
 - `predictions/<variant>.jsonl`
+- `evaluation/*` after you run the evaluator
 
-### 3. Evaluate the run
+If the process is interrupted, rerunning the same command will skip completed rows and continue from the next unfinished item.
+
+If local inference sometimes hangs, use a hard timeout and stop-on-stall mode:
+
+```bash
+python inference_eval/run_variants.py \
+  --config inference_eval/configs/ollama_first.json \
+  --hard-timeout 300 \
+  --stall-cooldown 300 \
+  --exit-on-stall
+```
+
+That will abort any single call that hangs for more than 5 minutes, wait 5 minutes, then stop the script. Running the same command again resumes from the next unfinished row.
+
+### 3. Prepare or Submit an OpenAI batch
+
+This repo now includes a batch-prep utility that reuses the same prompt builder and schemas as the sync runner. It can either just write the batch files or write and submit them in one step.
+
+```bash
+python inference_eval/prepare_openai_batch.py \
+  --model gpt-5-nano \
+  --prompt-strategy few_shot
+```
+
+That writes a timestamped folder under `inference_eval/results/batches/` containing:
+
+- `requests.jsonl`
+- `request_index.jsonl`
+- `manifest.json`
+
+To prepare and submit in one command:
+
+```bash
+python inference_eval/prepare_openai_batch.py \
+  --model gpt-5-nano \
+  --prompt-strategy few_shot \
+  --submit
+```
+
+When `--submit` is used, the batch folder also gets:
+
+- `submission.json`
+
+Use `--limit 5` for a smoke run or `--run-name my-batch --overwrite` to regenerate a specific batch folder.
+
+OpenAI batch prep defaults now use `reasoning_effort=low` and do not send `max_output_tokens` unless you pass that flag explicitly.
+
+### 4. Poll and download OpenAI batch results
+
+Poll once:
+
+```bash
+python inference_eval/poll_openai_batch.py \
+  --batch-dir inference_eval/results/batches/my-batch
+```
+
+Wait until completion:
+
+```bash
+python inference_eval/poll_openai_batch.py \
+  --batch-dir inference_eval/results/batches/my-batch \
+  --wait
+```
+
+Wait and download outputs into the same folder:
+
+```bash
+python inference_eval/poll_openai_batch.py \
+  --batch-dir inference_eval/results/batches/my-batch \
+  --wait \
+  --download
+```
+
+That writes:
+
+- `status.json`
+- `output.jsonl` when the batch completes successfully
+- `errors.jsonl` when OpenAI returns an error file
+
+### 5. Import batch outputs into the prediction format
+
+Batch polling writes raw OpenAI batch files. Convert them into the same normalized `predictions/*.jsonl` format used by local runs:
+
+```bash
+python inference_eval/import_openai_batch.py \
+  --batch-dir inference_eval/results/batches/my-batch \
+  --run-dir inference_eval/results \
+  --overwrite
+```
+
+That writes `predictions/<variant>.jsonl`, which can then be scored alongside local-model outputs.
+
+### 6. Evaluate the run
 
 ```bash
 python inference_eval/evaluate_variants.py \
-  --run-dir inference_eval/runs/<timestamp-config-name>
+  --run-dir inference_eval/results
 ```
 
 This writes:
@@ -104,49 +163,47 @@ This writes:
 - `evaluation/metrics_by_variant.csv`
 - `evaluation/metrics_summary.md`
 
+The evaluator scans every `predictions/*.jsonl` file in the run directory, so imported batch variants are included even if they were not listed in the current `manifest.json`.
+
 ## Output Semantics
 
-The runner emits one prediction per `complaint x construct x variant`. That keeps the experiment close to the current annotation process, where constructs are conceptually distinct and differ in difficulty.
+The runner emits one prediction per `complaint x call bundle x variant`.
 
-The evaluator currently reports:
+- `c1` is the bundled `C0 + C1` call.
+- `c2`, `c3`, and `c4` remain one call each.
+- The manifest records `calls_per_narrative=4`.
+- Restarting the runner is safe because already-written outputs are reused.
+- Retrieval variants also record `retrieval_policy`, `retrieval_k`, and the retrieved complaint ids in per-request outputs.
 
-- `C1`: accuracy on perceived information vulnerability score.
-- `C2`: accuracy on absolute-loss code, relative-significance score, and psychological-harm flag, plus exact match on amount strings.
-- `C3`: micro precision/recall/F1 for emotion presence, exact-match across all eight emotions, tier accuracy on positive emotions, and inference-pattern accuracy on Tier 2 items.
-- `C4`: accuracy on investment engagement score.
-- `majority_baseline`: a simple deterministic baseline computed from the current provisional ground truth.
+## Evaluation Metrics
 
-## Ground Truth Assumption
+- `c1`
+  - `c0_label_accuracy`
+  - `c1_score_accuracy`
+- `c2`
+  - `abs_code_accuracy`
+  - `abs_amount_exact_match`
+  - `rel_score_accuracy`
+- `c3`
+  - `code_accuracy`
+  - emotion-label micro precision / recall / F1
+  - emotion exact match
+  - `tier_accuracy_on_positive`
+  - pattern exact match and label metrics on tier-2 rows
+- `c4`
+  - `score_accuracy`
 
-Current assumption:
+## Files
 
-- [`annotation_folder/annotated_results.csv`](/Users/kevin/school/532/project_repo/annotation_folder/annotated_results.csv) is the stand-in ground truth for evaluation.
+- [`run_variants.py`](/Users/kevin/school/532/project_repo/inference_eval/run_variants.py): executes the variant matrix and writes normalized predictions.
+- [`evaluate_variants.py`](/Users/kevin/school/532/project_repo/inference_eval/evaluate_variants.py): scores predictions against the merged workbook and adds a majority baseline.
+- [`prompt_templates.py`](/Users/kevin/school/532/project_repo/inference_eval/prompt_templates.py): prompt construction for `zero_shot`, `few_shot`, and `retrieval_few_shot`.
+- [`retrieval.py`](/Users/kevin/school/532/project_repo/inference_eval/retrieval.py): LangChain TF-IDF retrieval and construct-specific exemplar rendering.
+- [`common.py`](/Users/kevin/school/532/project_repo/inference_eval/common.py): target schemas, label normalization, dataset loading, and shared helpers.
+- [`configs/ollama_first.json`](/Users/kevin/school/532/project_repo/inference_eval/configs/ollama_first.json): local-first variant config with commented OpenAI examples.
 
-Later update path:
+## Related Docs
 
-- Replace or extend this with reviewed override columns or an adjudicated export once the human review is finished.
-
-## Current API Notes Verified On 2026-03-30
-
-### Ollama
-
-- Ollama’s API docs center local chat generation on [`/api/chat`](https://docs.ollama.com/api/chat).
-- Ollama’s structured outputs docs say to pass a JSON schema through the `format` field and note that it also helps to repeat the schema in the prompt: [Structured Outputs](https://docs.ollama.com/capabilities/structured-outputs).
-- General API entry point: [Ollama API introduction](https://docs.ollama.com/api/introduction).
-
-### OpenAI
-
-- The current GPT-5.4 model page shows support for `v1/responses`, `v1/batch`, and structured outputs, and lists reasoning effort settings `none`, `low`, `medium`, `high`, `xhigh`: [GPT-5.4 model page](https://developers.openai.com/api/docs/models/gpt-5.4).
-- The current structured outputs guide shows the Responses API shape using `text.format` with `type: "json_schema"`: [Structured outputs guide](https://developers.openai.com/api/docs/guides/structured-outputs).
-- The migration guide shows the Responses API pattern with `input` and `response.output_text`: [Migrate to Responses](https://developers.openai.com/api/docs/guides/migrate-to-responses).
-
-Those docs are why this scaffold uses:
-
-- Ollama `POST /api/chat` with `format=<json schema>`.
-- OpenAI `POST /v1/responses` with `text.format`.
-
-## Suggested Next Steps
-
-1. Run the Ollama variants on `--limit 10` first to see which models actually follow the schemas reliably on your machine.
-2. Keep the prompt strategies fixed while swapping models, then keep the model fixed while swapping prompt strategies.
-3. After human review is finished, update `build_ground_truth()` so override columns take precedence over provisional labels.
+- [`README_retrieval.md`](/Users/kevin/school/532/project_repo/inference_eval/README_retrieval.md): dedicated retrieval-few-shot guide with local and batch workflows.
+- [`diagrams/retrieval_pipeline.md`](/Users/kevin/school/532/project_repo/inference_eval/diagrams/retrieval_pipeline.md): high-level retrieval pipeline diagram.
+- [`analysis/README.md`](/Users/kevin/school/532/project_repo/inference_eval/analysis/README.md): notebook-based metrics analysis workspace and generated tables.

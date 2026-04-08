@@ -1,0 +1,17 @@
+| Model | Prompt Strategy | C0 Acc | C1 Acc | C2 Abs Acc | C2 Rel Acc | C3 Code Acc | C3 Emotion F1 | C4 Acc |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Gemma 3 4B | Zero-shot | 0.2462 | 0.04 | 0.68 | 0.06 | 0.28 | 0.3732 | 0.54 |
+| Qwen 3 8B | Zero-shot | 0.3385 | 0.13 | 0.7755 | 0.1224 | 0.52 | 0.3578 | 0.7071 |
+| GPT-5-nano | Zero-shot | 0.4615 | 0.47 | 0.75 | 0.25 | 0.3519 | 0.0816 | 0.641 |
+| GPT-5.4-mini | Zero-shot | 0.5077 | 0.43 | 0.8 | 0.5 | 0.46 | 0.5039 | 0.67 |
+| Gemma 3 4B | Few-shot | 0.1077 | 0.03 | 0.7677 | 0.3535 | 0.34 | 0.338 | 0.6162 |
+| Qwen 3 8B | Few-shot | 0.3231 | 0.43 | 0.8283 | 0.0808 | 0.4 | 0.3321 | 0.4949 |
+| GPT-5-nano | Few-shot | 0.3385 | 0.37 | 0.86 | 0.31 | 0.35 | 0.381 | 0.71 |
+| GPT-5.4-mini | Few-shot | 0.4308 | 0.65 | 0.84 | 0.46 | 0.45 | 0.4861 | 0.74 |
+| Gemma 3 4B | Retrieval few-shot (MiniLM) | 0.3281 | 0.1313 | 0.73 | 0.32 | 0.41 | 0.3985 | 0.62 |
+| Gemma 3 4B | Retrieval few-shot (TF-IDF) | 0.2812 | 0.0722 | 0.81 | 0.29 | 0.33 | 0.3617 | 0.5354 |
+| Qwen 3 8B | Retrieval few-shot (MiniLM) | 0.4219 | 0.4646 | 0.84 | 0.23 | 0.43 | 0.4059 | 0.74 |
+| Qwen 3 8B | Retrieval few-shot (TF-IDF) | 0.4462 | 0.41 | 0.8687 | 0.2828 | 0.38 | 0.4071 | 0.68 |
+| GPT-5-nano | Retrieval few-shot (MiniLM) | 0.4769 | 0.49 | 0.86 | 0.37 | 0.36 | 0.3486 | 0.72 |
+| GPT-5-nano | Retrieval few-shot (TF-IDF) | 0.4462 | 0.41 | 0.84 | 0.32 | 0.44 | 0.386 | 0.73 |
+| GPT-5.4-mini | Retrieval few-shot (MiniLM) | 0.4154 | 0.61 | 0.9 | 0.5 | 0.45 | 0.4836 | 0.75 |

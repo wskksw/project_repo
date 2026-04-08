@@ -1,0 +1,11 @@
+{
+  "batch_id": "batch_69d46489a88c81908c3e86f8fbe89dd1",
+  "status": "completed",
+  "request_counts": {
+    "total": 400,
+    "completed": 300,
+    "failed": 100
+  },
+  "output_file_id": "file-WWcHSmAmAk48BbCTVQxL89",
+  "error_file_id": "file-QYV5dgMT7RDuVS3vCaJo12"
+}

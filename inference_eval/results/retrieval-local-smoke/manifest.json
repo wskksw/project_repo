@@ -1,0 +1,36 @@
+{
+  "created_utc": "20260407T164515Z",
+  "config_path": "/Users/kevin/school/532/project_repo/inference_eval/configs/ollama_first.json",
+  "data_path": "/Users/kevin/school/532/project_repo/annotation_folder/annotated_results_merged_100.xlsx",
+  "config_name": "ollama-first",
+  "rows": 1,
+  "constructs": [
+    "c1",
+    "c2",
+    "c3",
+    "c4"
+  ],
+  "calls_per_narrative": 4,
+  "call_layout": {
+    "c1": "Construct 0 + Construct 1",
+    "c2": "Construct 2",
+    "c3": "Construct 3",
+    "c4": "Construct 4"
+  },
+  "transductive_retrieval_experiment": true,
+  "retrieval_policy": "leave_one_out",
+  "retrieval_source_data_path": "/Users/kevin/school/532/project_repo/annotation_folder/annotated_results_merged_100.xlsx",
+  "retrieval_candidate_k": 3,
+  "variants": [
+    {
+      "name": "ollama-qwen3-retrieval-few-shot",
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "prompt_strategy": "retrieval_few_shot",
+      "retrieval_k": 2,
+      "temperature": 0,
+      "num_ctx": 32768,
+      "enabled": true
+    }
+  ]
+}

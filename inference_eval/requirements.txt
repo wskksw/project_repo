@@ -1,0 +1,8 @@
+langchain==1.0.5
+langchain-community==0.4.1
+langchain-core==1.0.4
+openai
+openpyxl
+pandas
+scikit-learn==1.8.0
+sentence-transformers

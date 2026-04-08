@@ -1,0 +1,25 @@
+MERGE CHECK REPORT (corrected)
+=============================
+nat rows=100 cols=25
+kevin rows=100 cols=25
+merged rows=100 cols=25
+ID order nat==kevin: True
+cell-level merge mismatches vs expected logic: 0
+
+Coverage by half for Kevin-only columns (should now be present in first 50 when available):
+  c0_evidence quotes: first50=30/50 last50=50/50
+  c1_label: first50=30/50 last50=50/50
+  c4_label: first50=30/50 last50=50/50
+
+Core completeness (empty-string/NaN treated missing):
+rows with all core fields present: 99/100
+  c0_label missing: 1
+  c1_score missing: 1
+  c2_abs_code missing: 0
+  c2_abs_amount missing: 0
+  c2_rel_score missing: 0
+  c3_code missing: 0
+  c4_score missing: 0
+
+Rows still missing core fields:
+  row 42, Complaint ID 13972297, missing ['c0_label', 'c1_score']
